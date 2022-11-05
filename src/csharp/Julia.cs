@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-//Written by Johnathan Bizzano 
+//Written by Johnathan Bizzano
 namespace JULIAdotNET
 {
     public class JuliaOptions
     {
         public string JuliaDirectory;
         public List<string> Arguments = new List<string>();
-        
+
         public int ThreadCount = 1;
         public int WorkerCount = 1;
         public int Optimize = 2;
@@ -159,7 +159,7 @@ namespace JULIAdotNET
                                             catch e
                                                 @eval begin
                                                            using Pkg
-                                                           Pkg.add(url=""https://github.com/HyperSphereStudio/JULIAdotNET"")
+                                                           Pkg.add(url=""https://github.com/gkantsidis/JULIAdotNET.git"")
                                                            using JULIAdotNET
                                                       end
                                             end
@@ -172,12 +172,12 @@ namespace JULIAdotNET
             JLModule.init_mods();
             JLType.init_types();
             JLFun.init_funs();
-            
+
             CheckExceptions();
         }
 
         public static void Throw(Exception e) => JuliaCalls.jl_throw(JLType.SharpJLException.Create(NativeSharp.CreateJuliaVal(JLType.SharpObject, e)));
-        
+
         public static bool Isa(JLVal v, JLType t) => JuliaCalls.jl_isa(v, t) != 0;
 
         public static void SetGlobal(JLModule m, JLSym sym, JLVal val){
@@ -216,7 +216,7 @@ namespace JULIAdotNET
         public static JLVal MakeTuple(JLArray vals) => JLFun._MakeTupleF.Invoke(vals);
 
         public static JLFun GetFunction(JLModule mod, string fun) => GetGlobal(mod, fun);
-        
+
         public static void PUSH_GC(params JLVal[] values){
             unsafe{
                 lock (_gclock) lastFrame = JuliaCalls.JLGCFrame.createNewFrame(lastFrame, values);
@@ -241,7 +241,7 @@ namespace JULIAdotNET
             CheckExceptions();
             return Marshal.PtrToStringAnsi(p);
         }
-        
+
     }
 
 

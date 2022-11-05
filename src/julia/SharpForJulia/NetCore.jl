@@ -2,7 +2,7 @@ module NetCore
     export Init
 
     using Libdl
-    
+
     const Debug = true
 
     const MinimumNetVersion = "4.0.1"
@@ -13,18 +13,18 @@ module NetCore
         const CStr = Cwstring
         const Ccar = Cwchar_t
     elseif Sys.islinux() || Sys.isunix()
-        const CStr = Cstring 
+        const CStr = Cstring
         const Ccar = Cchar
     end
     const CStrPtr = Ptr{CStr}
 
-    if Debug 
+    if Debug
         ENV["COREHOST_TRACE"] = 1
         ENV["COREHOST_TRACE_VERBOSITY"] = 4
     end
 
-    
-    @enum hostfxr_delegate_type begin 
+
+    @enum hostfxr_delegate_type begin
         hdt_com_activation
         hdt_load_in_memory_assembly
         hdt_winrt_activation
@@ -96,7 +96,7 @@ module NetCore
             #Get Host Path
             host_dir = generate_buffer()
             host_dir_len = Ref{Csize_t}(max_path)
-            check(ccall(get_hostfxr_path, StatusCode, (CStr, Ptr{Csize_t}, Ptr{Nothing}), host_dir, host_dir_len, C_NULL), 
+            check(ccall(get_hostfxr_path, StatusCode, (CStr, Ptr{Csize_t}, Ptr{Nothing}), host_dir, host_dir_len, C_NULL),
                 "Unable To Successfully Call get_hostfxr_path")
 
             #Initialize Init, Get, Close
@@ -104,20 +104,20 @@ module NetCore
             init_fptr = load_f(host_lib, "hostfxr_initialize_for_runtime_config")
             get_delegate_fptr = load_f(host_lib, "hostfxr_get_runtime_delegate")
             close_fptr = load_f(host_lib, "hostfxr_close")
-        
+
             #Initialize .NET
             cxt = Ref{Ptr{Cvoid}}(C_NULL)
-            rc = ccall(init_fptr, StatusCode, (CStr, Ptr, Ref, ), runtime_json_config_path, C_NULL, cxt)
+            rc = ccall(init_fptr, StatusCode, (CStr, Ptr{Nothing}, Ref{Ptr{Cvoid}}, ), runtime_json_config_path, C_NULL, cxt)
             (rc != 0 || cxt == C_NULL) && check(rc, "Unable To Initialize from Runtime Config.")
 
             #Obtain load asm and get function ptr
             load_assembly_and_get_function_pointer = Ref{Ptr{Cvoid}}(C_NULL)
-            check(ccall(get_delegate_fptr, StatusCode, (Ptr{Cvoid}, hostfxr_delegate_type, Ref{Ptr{Cvoid}}, ), 
-                cxt[], 
+            check(ccall(get_delegate_fptr, StatusCode, (Ptr{Cvoid}, hostfxr_delegate_type, Ref{Ptr{Cvoid}}, ),
+                cxt[],
                 hdt_load_assembly_and_get_function_pointer,
                 load_assembly_and_get_function_pointer),
             "Unable to Retrieve Load Assembly and Get Function Pointer")
-        
+
             #Close the .NET Context
             check(ccall(close_fptr, StatusCode, (Ptr{Cvoid}, ), cxt[]),
                 "Unable to Close Context Handle")
@@ -134,9 +134,9 @@ module NetCore
                    dot_net_method,
                    unmanaged_function,
                    C_NULL,
-                   IntializeFromJulia)), 
+                   IntializeFromJulia)),
             "Unable to Obtain Init Handle")
-        
+
             julia_bindir = Sys.BINDIR
             check(ccall(IntializeFromJulia[], StatusCode, (CStr, Cint), julia_bindir, sizeof(julia_bindir)),
                 "Unable To Initialize Julia Interface")
