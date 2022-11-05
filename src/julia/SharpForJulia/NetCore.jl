@@ -107,7 +107,7 @@ module NetCore
 
             #Initialize .NET
             cxt = Ref{Ptr{Cvoid}}(C_NULL)
-            rc = ccall(init_fptr, StatusCode, (CStr, Ptr{Nothing}, Ref{Ptr{Cvoid}}, ), runtime_json_config_path, C_NULL, cxt)
+            rc = ccall(init_fptr, StatusCode, (CStr, Ptr{Cvoid}, Ref{Ptr{Cvoid}}, ), runtime_json_config_path, C_NULL, cxt)
             (rc != 0 || cxt == C_NULL) && check(rc, "Unable To Initialize from Runtime Config.")
 
             #Obtain load asm and get function ptr
